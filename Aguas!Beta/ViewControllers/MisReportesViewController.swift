@@ -30,8 +30,12 @@ class MisReportesViewController: UIViewController,
 
         // Mantiene una altura uniforme para las celdas
         tableView.rowHeight = 72
+        
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
 
-        // Solicita al backend los reportes del usuario
         loadReports()
     }
 

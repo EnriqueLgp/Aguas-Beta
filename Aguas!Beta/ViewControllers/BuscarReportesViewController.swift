@@ -4,8 +4,8 @@
 //
 //  Created by Enrique Lopez Gallo Perez on 04/10/26.
 //
-//  Controlador encargado de consultar los reportes verificados
-//  disponibles en el backend y permitir su búsqueda.
+// Controlador encargado de consultar los reportes verificados
+//disponibles en el backend y permitir su búsqueda.
 
 import UIKit
 
@@ -35,13 +35,14 @@ class BuscarReportesViewController: UIViewController,
         searchBar.delegate = self
 
         tableView.rowHeight = 72
+        
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
 
-        // Solicita al backend los reportes disponibles para la búsqueda
         loadReports()
     }
-
-
-    // MARK: - Carga de reportes
 
     // Obtiene desde la API los reportes cuyo estado ha sido marcado como verificado
     private func loadReports() {
@@ -59,7 +60,7 @@ class BuscarReportesViewController: UIViewController,
                         Report(response: $0)
                     }
 
-                    // Al iniciar, todos los reportes obtenidos deben mostrarse en la tabla
+                    // Actualiza la lista mostrada con los reportes obtenidos del backend
                     self.filteredReports = self.reports
 
                     self.tableView.reloadData()
