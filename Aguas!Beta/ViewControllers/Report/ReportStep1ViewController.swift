@@ -1,3 +1,10 @@
+//
+//  ReportStep1ViewController.swift
+//  Aguas!Beta
+//
+//  Created by Enrique Lopez Gallo Perez on 20/09/26.
+//
+
 import UIKit
 
 class ReportStep1ViewController: UIViewController {
@@ -41,7 +48,7 @@ class ReportStep1ViewController: UIViewController {
             return
         }
 
-        // Guarda los datos de Step 1 en el borrador.
+        // Guarda los datos de Step 1 en el borrador
         reportDraft.phone = phone
         reportDraft.url = url
         reportDraft.impersonatedCompany = companyTextField.text?
@@ -68,15 +75,15 @@ class ReportStep1ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        // Carga los datos que ya estaban guardados en el borrador.
+        // Carga los datos que ya estaban guardados en el borrador
         phoneTextField.text = reportDraft.phone
         urlTextField.text = reportDraft.url
         companyTextField.text = reportDraft.impersonatedCompany
 
-        // Permite ocultar el teclado arrastrando el Scroll View.
+        // Permite ocultar el teclado arrastrando el Scroll View
         scrollView.keyboardDismissMode = .interactive
 
-        // Oculta el teclado al tocar fuera de los TextFields.
+        //Oculta el teclado al tocar fuera de los TextFields
         let tapGesture = UITapGestureRecognizer(
             target: self,
             action: #selector(dismissKeyboard)
@@ -85,7 +92,7 @@ class ReportStep1ViewController: UIViewController {
         tapGesture.cancelsTouchesInView = false
         view.addGestureRecognizer(tapGesture)
 
-        // Detecta cuando aparece el teclado.
+        // Detecta cuando aparece el teclado
         NotificationCenter.default.addObserver(
             self,
             selector: #selector(keyboardWillShow),
@@ -93,7 +100,7 @@ class ReportStep1ViewController: UIViewController {
             object: nil
         )
 
-        // Detecta cuando desaparece el teclado.
+        // Detecta cuando desaparece el teclado
         NotificationCenter.default.addObserver(
             self,
             selector: #selector(keyboardWillHide),

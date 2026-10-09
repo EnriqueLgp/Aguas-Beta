@@ -19,36 +19,29 @@ class ReportStep2ViewController: UIViewController,
     @IBOutlet weak var attachEvidenceButton: UIButton!
 
     private let descriptionPlaceholder = "Escribe lo que ocurrió"
-    private let maximumEvidenceCount = 5
 
     var reportDraft: ReportDraft!
 
-    // Fotos seleccionadas.
+    // El backend permite una sola evidencia por reporte
     private var selectedEvidenceImages: [UIImage] = []
-
-    // Archivos seleccionados.
     private var selectedEvidenceFileURLs: [URL] = []
 
-    private var totalEvidenceCount: Int {
-        selectedEvidenceImages.count + selectedEvidenceFileURLs.count
+    private var hasEvidence: Bool {
+        !selectedEvidenceImages.isEmpty ||
+        !selectedEvidenceFileURLs.isEmpty
     }
 
     @IBAction func attachEvidenceTapped(_ sender: UIButton) {
 
-        if totalEvidenceCount >= maximumEvidenceCount {
-            showEvidenceLimitAlert()
-            return
-        }
-
         let actionSheet = UIAlertController(
-            title: "Adjuntar evidencia",
+            title: hasEvidence ? "Cambiar evidencia" : "Adjuntar evidencia",
             message: "Selecciona el tipo de evidencia que quieres adjuntar.",
             preferredStyle: .actionSheet
         )
 
         actionSheet.addAction(
             UIAlertAction(
-                title: "Elegir fotos",
+                title: "Elegir foto",
                 style: .default,
                 handler: { [weak self] _ in
                     self?.openPhotoPicker()
@@ -58,7 +51,7 @@ class ReportStep2ViewController: UIViewController,
 
         actionSheet.addAction(
             UIAlertAction(
-                title: "Elegir archivos",
+                title: "Elegir archivo",
                 style: .default,
                 handler: { [weak self] _ in
                     self?.openDocumentPicker()
@@ -102,7 +95,27 @@ class ReportStep2ViewController: UIViewController,
             return
         }
 
-        // Guarda los datos de Step 2 en el borrador.
+        // El backend requiere que cada reporte tenga una evidencia
+        guard hasEvidence else {
+
+            let alert = UIAlertController(
+                title: "Falta evidencia",
+                message: "Adjunta una foto o archivo como evidencia para continuar.",
+                preferredStyle: .alert
+            )
+
+            alert.addAction(
+                UIAlertAction(
+                    title: "Aceptar",
+                    style: .default
+                )
+            )
+
+            present(alert, animated: true)
+
+            return
+        }
+
         reportDraft.descriptionText = description
         reportDraft.evidenceImages = selectedEvidenceImages
         reportDraft.evidenceFileURLs = selectedEvidenceFileURLs
@@ -119,7 +132,8 @@ class ReportStep2ViewController: UIViewController,
     ) {
 
         if segue.identifier == "goToReportReview",
-           let destination = segue.destination as? ReportReviewViewController {
+           let destination =
+            segue.destination as? ReportReviewViewController {
 
             destination.reportDraft = reportDraft
         }
@@ -128,13 +142,11 @@ class ReportStep2ViewController: UIViewController,
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        // Configura el Text View.
         descriptionTextView.delegate = self
         descriptionTextView.backgroundColor = .secondarySystemBackground
         descriptionTextView.layer.cornerRadius = 10
         descriptionTextView.clipsToBounds = true
 
-        // Espacio interno del Text View.
         descriptionTextView.textContainerInset = UIEdgeInsets(
             top: 12,
             left: 10,
@@ -142,9 +154,19 @@ class ReportStep2ViewController: UIViewController,
             right: 10
         )
 
-        // Carga los datos ya guardados en el borrador.
-        selectedEvidenceImages = reportDraft.evidenceImages
-        selectedEvidenceFileURLs = reportDraft.evidenceFileURLs
+        // Recupera la información si el usuario vuelve desde Review
+        selectedEvidenceImages = Array(
+            reportDraft.evidenceImages.prefix(1)
+        )
+
+        selectedEvidenceFileURLs = Array(
+            reportDraft.evidenceFileURLs.prefix(1)
+        )
+
+        // Evita conservar simultáneamente una imagen y un archivo
+        if !selectedEvidenceImages.isEmpty {
+            selectedEvidenceFileURLs.removeAll()
+        }
 
         if reportDraft.descriptionText.isEmpty {
 
@@ -157,13 +179,10 @@ class ReportStep2ViewController: UIViewController,
             descriptionTextView.textColor = .label
         }
 
-        // Actualiza el botón según las evidencias ya guardadas.
         updateEvidenceButton()
 
-        // Permite ocultar el teclado arrastrando.
         scrollView.keyboardDismissMode = .interactive
 
-        // Oculta el teclado al tocar fuera.
         let tapGesture = UITapGestureRecognizer(
             target: self,
             action: #selector(dismissKeyboard)
@@ -172,7 +191,6 @@ class ReportStep2ViewController: UIViewController,
         tapGesture.cancelsTouchesInView = false
         view.addGestureRecognizer(tapGesture)
 
-        // Detecta cuando aparece el teclado.
         NotificationCenter.default.addObserver(
             self,
             selector: #selector(keyboardWillShow),
@@ -180,7 +198,6 @@ class ReportStep2ViewController: UIViewController,
             object: nil
         )
 
-        // Detecta cuando desaparece el teclado.
         NotificationCenter.default.addObserver(
             self,
             selector: #selector(keyboardWillHide),
@@ -189,21 +206,12 @@ class ReportStep2ViewController: UIViewController,
         )
     }
 
-    // MARK: - Photo Picker
-
     private func openPhotoPicker() {
-
-        let remainingSlots = maximumEvidenceCount - totalEvidenceCount
-
-        guard remainingSlots > 0 else {
-            showEvidenceLimitAlert()
-            return
-        }
 
         var configuration = PHPickerConfiguration()
 
         configuration.filter = .images
-        configuration.selectionLimit = remainingSlots
+        configuration.selectionLimit = 1
 
         let picker = PHPickerViewController(
             configuration: configuration
@@ -221,54 +229,40 @@ class ReportStep2ViewController: UIViewController,
 
         picker.dismiss(animated: true)
 
-        guard !results.isEmpty else {
+        guard let result = results.first else {
             return
         }
 
-        for result in results {
+        let itemProvider = result.itemProvider
 
-            let itemProvider = result.itemProvider
+        guard itemProvider.canLoadObject(
+            ofClass: UIImage.self
+        ) else {
+            return
+        }
 
-            guard itemProvider.canLoadObject(
-                ofClass: UIImage.self
-            ) else {
-                continue
+        itemProvider.loadObject(
+            ofClass: UIImage.self
+        ) { [weak self] object, error in
+
+            guard let self = self,
+                  let image = object as? UIImage,
+                  error == nil else {
+                return
             }
 
-            itemProvider.loadObject(
-                ofClass: UIImage.self
-            ) { [weak self] object, error in
+            DispatchQueue.main.async {
 
-                guard let self = self,
-                      let image = object as? UIImage,
-                      error == nil else {
-                    return
-                }
+                // Una nueva selección reemplaza cualquier evidencia anterior
+                self.selectedEvidenceImages = [image]
+                self.selectedEvidenceFileURLs.removeAll()
 
-                DispatchQueue.main.async {
-
-                    guard self.totalEvidenceCount < self.maximumEvidenceCount else {
-                        return
-                    }
-
-                    self.selectedEvidenceImages.append(image)
-
-                    self.updateEvidenceButton()
-                }
+                self.updateEvidenceButton()
             }
         }
     }
 
-    // MARK: - Document Picker
-
     private func openDocumentPicker() {
-
-        let remainingSlots = maximumEvidenceCount - totalEvidenceCount
-
-        guard remainingSlots > 0 else {
-            showEvidenceLimitAlert()
-            return
-        }
 
         let picker = UIDocumentPickerViewController(
             forOpeningContentTypes: [
@@ -281,7 +275,7 @@ class ReportStep2ViewController: UIViewController,
         )
 
         picker.delegate = self
-        picker.allowsMultipleSelection = true
+        picker.allowsMultipleSelection = false
 
         present(picker, animated: true)
     }
@@ -291,61 +285,20 @@ class ReportStep2ViewController: UIViewController,
         didPickDocumentsAt urls: [URL]
     ) {
 
-        let remainingSlots = maximumEvidenceCount - totalEvidenceCount
-
-        guard remainingSlots > 0 else {
-            showEvidenceLimitAlert()
+        guard let selectedURL = urls.first else {
             return
         }
 
-        let filesToAdd = Array(
-            urls.prefix(remainingSlots)
-        )
-
-        selectedEvidenceFileURLs.append(
-            contentsOf: filesToAdd
-        )
+        // Una nueva selección reemplaza cualquier evidencia anterior
+        selectedEvidenceFileURLs = [selectedURL]
+        selectedEvidenceImages.removeAll()
 
         updateEvidenceButton()
-
-        if urls.count > remainingSlots {
-
-            let alert = UIAlertController(
-                title: "Límite de evidencias",
-                message: "Solo se agregaron los archivos disponibles hasta completar un máximo de 5 evidencias.",
-                preferredStyle: .alert
-            )
-
-            alert.addAction(
-                UIAlertAction(
-                    title: "Aceptar",
-                    style: .default
-                )
-            )
-
-            present(alert, animated: true)
-        }
     }
-
-    // MARK: - Evidence UI
 
     private func updateEvidenceButton() {
 
-        let count = totalEvidenceCount
-
-        if count == 0 {
-
-            attachEvidenceButton.setTitle(
-                "Adjunta fotos o archivos",
-                for: .normal
-            )
-
-            attachEvidenceButton.setImage(
-                UIImage(systemName: "paperclip"),
-                for: .normal
-            )
-
-        } else if count == 1 {
+        if hasEvidence {
 
             attachEvidenceButton.setTitle(
                 "1 evidencia seleccionada",
@@ -360,36 +313,16 @@ class ReportStep2ViewController: UIViewController,
         } else {
 
             attachEvidenceButton.setTitle(
-                "\(count) evidencias seleccionadas",
+                "Adjunta una foto o archivo",
                 for: .normal
             )
 
             attachEvidenceButton.setImage(
-                UIImage(systemName: "checkmark.circle.fill"),
+                UIImage(systemName: "paperclip"),
                 for: .normal
             )
         }
     }
-
-    private func showEvidenceLimitAlert() {
-
-        let alert = UIAlertController(
-            title: "Límite alcanzado",
-            message: "Puedes adjuntar un máximo de 5 evidencias.",
-            preferredStyle: .alert
-        )
-
-        alert.addAction(
-            UIAlertAction(
-                title: "Aceptar",
-                style: .default
-            )
-        )
-
-        present(alert, animated: true)
-    }
-
-    // MARK: - UITextViewDelegate
 
     func textViewDidBeginEditing(_ textView: UITextView) {
 
@@ -409,8 +342,6 @@ class ReportStep2ViewController: UIViewController,
             textView.textColor = .placeholderText
         }
     }
-
-    // MARK: - Keyboard
 
     @objc func dismissKeyboard() {
         view.endEditing(true)

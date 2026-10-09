@@ -9,21 +9,19 @@ import UIKit
 
 class ReportSentViewController: UIViewController {
 
-    @IBAction func viewReportsTapped(_ sender: UIButton) {
+    override func viewDidLoad() {
+        super.viewDidLoad()
 
+        // Evita regresar al Review después de enviar el reporte
+        navigationItem.hidesBackButton = true
+    }
+
+    @IBAction func viewReportsTapped(_ sender: UIButton) {
         closeReportFlowAndGoToTab(index: 1)
     }
 
     @IBAction func goHomeTapped(_ sender: UIButton) {
-
         closeReportFlowAndGoToTab(index: 0)
-    }
-
-    override func viewDidLoad() {
-        super.viewDidLoad()
-
-        // Evita regresar al Review después de enviar el reporte.
-        navigationItem.hidesBackButton = true
     }
 
     private func closeReportFlowAndGoToTab(index: Int) {
@@ -32,20 +30,20 @@ class ReportSentViewController: UIViewController {
             return
         }
 
-        guard let rootViewController =
-                view.window?.rootViewController else {
+        guard let rootViewController = view.window?.rootViewController else {
             return
         }
 
-        guard let tabBarController =
-                findTabBarController(from: rootViewController) else {
+        guard let tabBarController = findTabBarController(
+            from: rootViewController
+        ) else {
             return
         }
 
-        // Seleccionamos la pestaña deseada.
+        // Cambia a la pestaña deseada
         tabBarController.selectedIndex = index
 
-        // Cerramos todo el flujo del reporte.
+        // Cierra todo el flujo de creación del reporte
         reportNavigationController.dismiss(animated: true)
     }
 
@@ -53,34 +51,42 @@ class ReportSentViewController: UIViewController {
         from viewController: UIViewController
     ) -> UITabBarController? {
 
-        // Si este controlador ya es el Tab Bar, lo regresamos.
-        if let tabBarController =
-            viewController as? UITabBarController {
-
+        //Si ya encontramos el Tab Bar, lo regresamos
+        if let tabBarController = viewController as? UITabBarController {
             return tabBarController
         }
 
-        // Si es un Navigation Controller,
-        // buscamos dentro de sus controladores.
+        // Revisa controladores presentados de forma modal
+        if let presentedViewController =
+            viewController.presentedViewController {
+
+            if let tabBarController = findTabBarController(
+                from: presentedViewController
+            ) {
+                return tabBarController
+            }
+        }
+
+        //revisa controladores dentro de Navigation Controllers
         if let navigationController =
             viewController as? UINavigationController {
 
             for controller in navigationController.viewControllers {
 
-                if let tabBarController =
-                    findTabBarController(from: controller) {
-
+                if let tabBarController = findTabBarController(
+                    from: controller
+                ) {
                     return tabBarController
                 }
             }
         }
 
-        // También revisamos los controladores hijos.
+        //Revisa controladores hijos
         for child in viewController.children {
 
-            if let tabBarController =
-                findTabBarController(from: child) {
-
+            if let tabBarController = findTabBarController(
+                from: child
+            ) {
                 return tabBarController
             }
         }

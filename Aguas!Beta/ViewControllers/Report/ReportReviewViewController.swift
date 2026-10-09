@@ -61,24 +61,61 @@ class ReportReviewViewController: UIViewController {
     }
 
     @IBAction func sendReportTapped(_ sender: UIButton) {
-        performSegue(
-              withIdentifier: "goToReportSent",
-              sender: self
-          )
+
+        //evita que el usuario envíe el mismo reporte varias veces mientras la petición está en proceso
+        sender.isEnabled = false
+
+        ReportService.shared.createReport(
+            draft: reportDraft
+        ) { result in
+
+            DispatchQueue.main.async {
+
+                switch result {
+
+                case .success:
+
+                    // La pantalla de confirmación solo se muestra si el backend aceptó correctamente el reporte
+                    self.performSegue(
+                        withIdentifier: "goToReportSent",
+                        sender: self
+                    )
+
+                case .failure(let error):
+
+                    sender.isEnabled = true
+
+                    let alert = UIAlertController(
+                        title: "No se pudo enviar el reporte",
+                        message: error.localizedDescription,
+                        preferredStyle: .alert
+                    )
+
+                    alert.addAction(
+                        UIAlertAction(
+                            title: "Aceptar",
+                            style: .default
+                        )
+                    )
+
+                    self.present(
+                        alert,
+                        animated: true
+                    )
+                }
+            }
+        }
     }
-    
-    
+
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        // Redondea las esquinas de las tarjetas.
         contactCardView.layer.cornerRadius = 12
         contactCardView.clipsToBounds = true
 
         descriptionCardView.layer.cornerRadius = 12
         descriptionCardView.clipsToBounds = true
 
-        // Muestra los datos capturados en Step 1.
         phoneValueLabel.text = reportDraft.phone.isEmpty
             ? "No proporcionado"
             : reportDraft.phone
@@ -91,25 +128,14 @@ class ReportReviewViewController: UIViewController {
             ? "No especificado"
             : reportDraft.impersonatedCompany
 
-        // Muestra la descripción capturada en Step 2.
         descriptionValueLabel.text = reportDraft.descriptionText
 
-        // Muestra cuántas evidencias fueron seleccionadas.
         let evidenceCount =
             reportDraft.evidenceImages.count +
             reportDraft.evidenceFileURLs.count
 
-        if evidenceCount == 0 {
-
-            evidenceCountLabel.text = "Sin evidencia adjunta"
-
-        } else if evidenceCount == 1 {
-
-            evidenceCountLabel.text = "1 elemento seleccionado"
-
-        } else {
-
-            evidenceCountLabel.text = "\(evidenceCount) elementos seleccionados"
-        }
+        evidenceCountLabel.text = evidenceCount == 1
+            ? "1 evidencia seleccionada"
+            : "Sin evidencia adjunta"
     }
 }

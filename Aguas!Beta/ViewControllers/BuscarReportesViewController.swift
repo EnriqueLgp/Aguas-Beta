@@ -4,6 +4,8 @@
 //
 //  Created by Enrique Lopez Gallo Perez on 04/10/26.
 //
+//  Controlador encargado de consultar los reportes verificados
+//  disponibles en el backend y permitir su búsqueda.
 
 import UIKit
 
@@ -15,63 +17,75 @@ class BuscarReportesViewController: UIViewController,
     @IBOutlet weak var searchBar: UISearchBar!
     @IBOutlet weak var tableView: UITableView!
 
-    private let reports: [Report] = [
-        Report(
-            title: "Me llegó un mensaje diciendo que...",
-            date: "03 oct 2026",
-            status: "Verificado",
-            phone: "55 1234 5678",
-            url: "https://paqueteria-falsa.com",
-            company: "DHL",
-            description: "Me llegó un mensaje diciendo que mi paquete estaba retenido y que tenía que pagar para liberarlo.",
-            evidenceImages: [
-                UIImage(named: "LogoAguas")!
-            ],
-            evidenceFileNames: ["captura_mensaje.pdf"]
-        ),
-        Report(
-            title: "Una página se hizo pasar por...",
-            date: "01 oct 2026",
-            status: "Verificado",
-            phone: "55 9876 5432",
-            url: "https://banco-seguro-falso.com",
-            company: "BBVA",
-            description: "Una página se hizo pasar por el banco y pedía ingresar datos de acceso para evitar un supuesto bloqueo.",
-            evidenceImages: [],
-            evidenceFileNames: []
-        ),
-        Report(
-            title: "Me ofrecieron un premio falso...",
-            date: "28 sep 2026",
-            status: "Verificado",
-            phone: "",
-            url: "https://premio-falso.com",
-            company: "Amazon",
-            description: "Me ofrecieron un premio falso y me pidieron ingresar datos personales para reclamarlo.",
-            evidenceImages: [],
-            evidenceFileNames: ["evidencia.txt"]
-        )
-    ]
+    //Contiene todos los reportes verificados obtenidos desde el backend
+    private var reports: [Report] = []
 
+    // Contiene únicamente los reportes que coinciden con el texto ingresado en la barra de búsqueda
     private var filteredReports: [Report] = []
+
+    // Guarda el reporte seleccionado para enviarlo posteriormente a la pantalla de detalle
     private var selectedReport: Report?
 
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        filteredReports = reports
-
+        // Configura los delegados necesarios para la tabla y la barra de búsqueda
         tableView.dataSource = self
         tableView.delegate = self
         searchBar.delegate = self
 
         tableView.rowHeight = 72
+
+        // Solicita al backend los reportes disponibles para la búsqueda
+        loadReports()
     }
 
+
+    // MARK: - Carga de reportes
+
+    // Obtiene desde la API los reportes cuyo estado ha sido marcado como verificado
+    private func loadReports() {
+
+        ReportService.shared.fetchVerifiedReports { result in
+
+            DispatchQueue.main.async {
+
+                switch result {
+
+                case .success(let responses):
+
+                    // Convierte cada respuesta del backend al modelo utilizado por la interfaz
+                    self.reports = responses.map {
+                        Report(response: $0)
+                    }
+
+                    // Al iniciar, todos los reportes obtenidos deben mostrarse en la tabla
+                    self.filteredReports = self.reports
+
+                    self.tableView.reloadData()
+
+                case .failure(let error):
+
+                    self.showAlert(
+                        title: "No se pudieron cargar los reportes",
+                        message: error.localizedDescription
+                    )
+                }
+            }
+        }
+    }
+
+
+    // Cierra el flujo modal utilizado para la pantalla de búsqueda de reportes
     @IBAction func closeTapped(_ sender: UIBarButtonItem) {
-        dismiss(animated: true)
+
+        dismiss(
+            animated: true
+        )
     }
 
+
+    // Indica cuántos resultados debe mostrar la tabla
     func tableView(
         _ tableView: UITableView,
         numberOfRowsInSection section: Int
@@ -80,6 +94,7 @@ class BuscarReportesViewController: UIViewController,
         return filteredReports.count
     }
 
+    // Configura cada celda utilizando los datos del reporte correspondiente
     func tableView(
         _ tableView: UITableView,
         cellForRowAt indexPath: IndexPath
@@ -92,14 +107,22 @@ class BuscarReportesViewController: UIViewController,
 
         let report = filteredReports[indexPath.row]
 
+        // La primera línea muestra el título generado a partir de la descripción del reporte
         cell.textLabel?.text = report.title
-        cell.detailTextLabel?.text = report.url
+
+        // La segunda línea muestra el enlace sospechoso
+        // Si el reporte no contiene enlace, se muestra un texto alternativo para evitar una celda vacía
+        cell.detailTextLabel?.text =
+            report.url.isEmpty
+            ? "Sin enlace registrado"
+            : report.url
 
         cell.accessoryType = .disclosureIndicator
 
         return cell
     }
 
+    // Filtra los reportes conforme el usuario escribe dentro de la barra de búsqueda
     func searchBar(
         _ searchBar: UISearchBar,
         textDidChange searchText: String
@@ -109,12 +132,14 @@ class BuscarReportesViewController: UIViewController,
             in: .whitespacesAndNewlines
         )
 
+        // Si no existe texto de búsqueda, se vuelven a mostrar todos los reportes
         if text.isEmpty {
 
             filteredReports = reports
 
         } else {
 
+            // Permite buscar utilizando tanto el título generado como el enlace sospechoso del reporte
             filteredReports = reports.filter { report in
 
                 report.title.localizedCaseInsensitiveContains(text) ||
@@ -122,9 +147,12 @@ class BuscarReportesViewController: UIViewController,
             }
         }
 
+        // Actualiza inmediatamente los resultados mostrados
         tableView.reloadData()
     }
 
+
+    // Guarda el reporte seleccionado y abre su pantalla de detalle
     func tableView(
         _ tableView: UITableView,
         didSelectRowAt indexPath: IndexPath
@@ -143,6 +171,8 @@ class BuscarReportesViewController: UIViewController,
         )
     }
 
+
+    // Envía el reporte seleccionado a la pantalla de detalle
     override func prepare(
         for segue: UIStoryboardSegue,
         sender: Any?
@@ -156,6 +186,34 @@ class BuscarReportesViewController: UIViewController,
         }
 
         destination.report = selectedReport
+
+        // Los resultados de búsqueda ya fueron verificados,
+        //por lo que la pantalla de detalle no muestra el estado del reporte
         destination.source = .search
+    }
+
+    // Presenta un mensaje cuando ocurre un problema al consultar información del backend
+    private func showAlert(
+        title: String,
+        message: String
+    ) {
+
+        let alert = UIAlertController(
+            title: title,
+            message: message,
+            preferredStyle: .alert
+        )
+
+        alert.addAction(
+            UIAlertAction(
+                title: "Aceptar",
+                style: .default
+            )
+        )
+
+        present(
+            alert,
+            animated: true
+        )
     }
 }
