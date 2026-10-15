@@ -52,6 +52,16 @@ class LoginViewController: UIViewController {
         )
     }
 
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+
+        // Si no existe una sesión activa, limpia los datos que pudieron quedar escritos anteriormente
+        if UserDefaults.standard.string(forKey: "accessToken") == nil {
+            emailTextField.text = ""
+            passwordTextField.text = ""
+        }
+    }
+
     @objc func dismissKeyboard() {
         view.endEditing(true)
     }
@@ -141,10 +151,15 @@ class LoginViewController: UIViewController {
                         forKey: "refreshToken"
                     )
 
-                    // Guarda el nombre del usuario para mostrarlo después en la pantalla de inicio
+                    // Guarda los datos del usuario para mostrarlos después en la aplicación
                     UserDefaults.standard.set(
                         response.nombre,
                         forKey: "userName"
+                    )
+                    
+                    UserDefaults.standard.set(
+                        response.correo,
+                        forKey: "userEmail"
                     )
 
                     // El login fue correcto, Ahora sí entra al Tab Bar Controller
