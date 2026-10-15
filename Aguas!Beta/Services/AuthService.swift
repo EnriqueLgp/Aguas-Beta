@@ -16,6 +16,7 @@ nonisolated struct LoginResponse: Codable, Sendable {
     let accessToken: String
     let refreshToken: String
     let nombre: String
+    let correo: String
 }
 
 enum AuthServiceError: LocalizedError {

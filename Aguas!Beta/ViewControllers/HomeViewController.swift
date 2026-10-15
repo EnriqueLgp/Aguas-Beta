@@ -24,4 +24,11 @@ class HomeViewController: UIViewController {
             welcomeLabel.text = "Bienvenid@"
         }
     }
+
+    @IBAction func notificationsTapped(_ sender: UIButton) {
+        performSegue(
+            withIdentifier: "goToNotifications",
+            sender: self
+        )
+    }
 }
