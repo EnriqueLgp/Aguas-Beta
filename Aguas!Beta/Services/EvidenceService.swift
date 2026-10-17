@@ -27,13 +27,6 @@ final class EvidenceService {
         completion: @escaping (Result<EvidenceResponse, Error>) -> Void
     ) {
 
-        guard let accessToken = UserDefaults.standard.string(
-            forKey: "accessToken"
-        ) else {
-            completion(.failure(EvidenceServiceError.missingAccessToken))
-            return
-        }
-
         guard let url = URL(
             string: "\(baseURL)/evidencia/reporte/\(reportID)"
         ) else {
@@ -44,12 +37,8 @@ final class EvidenceService {
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
 
-        request.setValue(
-            "Bearer \(accessToken)",
-            forHTTPHeaderField: "Authorization"
-        )
-
-        URLSession.shared.dataTask(with: request) {
+        // APIClient pone el token y lo renueva si venció (ver APIClient.swift)
+        APIClient.shared.send(request) {
             data,
             response,
             error in
@@ -101,7 +90,7 @@ final class EvidenceService {
                 completion(.failure(error))
             }
 
-        }.resume()
+        }
     }
 }
 

@@ -50,13 +50,6 @@ final class ReportService {
         completion: @escaping (Result<[ReportResponse], Error>) -> Void
     ) {
 
-        guard let accessToken = UserDefaults.standard.string(
-            forKey: "accessToken"
-        ) else {
-            completion(.failure(ReportServiceError.missingAccessToken))
-            return
-        }
-
         guard let url = URL(
             string: "\(baseURL)\(endpoint)"
         ) else {
@@ -68,12 +61,8 @@ final class ReportService {
 
         request.httpMethod = "GET"
 
-        request.setValue(
-            "Bearer \(accessToken)",
-            forHTTPHeaderField: "Authorization"
-        )
-
-        URLSession.shared.dataTask(with: request) {
+        // APIClient pone el token y lo renueva si venció (ver APIClient.swift)
+        APIClient.shared.send(request) {
             data,
             response,
             error in
@@ -118,20 +107,13 @@ final class ReportService {
                 completion(.failure(error))
             }
 
-        }.resume()
+        }
     }
 
     func createReport(
         draft: ReportDraft,
         completion: @escaping (Result<Void, Error>) -> Void
     ) {
-
-        guard let accessToken = UserDefaults.standard.string(
-            forKey: "accessToken"
-        ) else {
-            completion(.failure(ReportServiceError.missingAccessToken))
-            return
-        }
 
         guard let url = URL(
             string: "\(baseURL)/reportes"
@@ -146,11 +128,6 @@ final class ReportService {
         var request = URLRequest(url: url)
 
         request.httpMethod = "POST"
-
-        request.setValue(
-            "Bearer \(accessToken)",
-            forHTTPHeaderField: "Authorization"
-        )
 
         request.setValue(
             "multipart/form-data; boundary=\(boundary)",
@@ -248,8 +225,9 @@ final class ReportService {
 
         request.httpBody = body
 
-        URLSession.shared.dataTask(with: request) {
-            _,
+        // APIClient pone el token y lo renueva si venció (ver APIClient.swift)
+        APIClient.shared.send(request) {
+            data,
             response,
             error in
 
@@ -266,6 +244,13 @@ final class ReportService {
 
             guard (200...299).contains(httpResponse.statusCode) else {
 
+                // Si el backend explica el error (por ejemplo "Tu cuenta está
+                // suspendida…" o "Debes adjuntar un archivo"), se muestra tal cual.
+                if let mensaje = APIClient.mensajeDelServidor(data) {
+                    completion(.failure(ReportServiceError.serverMessage(mensaje)))
+                    return
+                }
+
                 completion(
                     .failure(
                         ReportServiceError.serverError(
@@ -279,7 +264,7 @@ final class ReportService {
 
             completion(.success(()))
 
-        }.resume()
+        }
     }
 
     private func appendTextField(
@@ -367,10 +352,14 @@ enum ReportServiceError: LocalizedError {
     case missingEvidence
     case invalidEvidence
     case serverError(Int)
+    case serverMessage(String)
 
     var errorDescription: String? {
 
         switch self {
+
+        case .serverMessage(let message):
+            return message
 
         case .invalidURL:
             return "La URL del servidor no es válida."

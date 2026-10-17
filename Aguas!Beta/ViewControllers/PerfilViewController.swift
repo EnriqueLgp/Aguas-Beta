@@ -69,21 +69,7 @@ class PerfilViewController: UIViewController {
 
     private func logout() {
 
-        UserDefaults.standard.removeObject(
-            forKey: "accessToken"
-        )
-
-        UserDefaults.standard.removeObject(
-            forKey: "refreshToken"
-        )
-
-        UserDefaults.standard.removeObject(
-            forKey: "userName"
-        )
-
-        UserDefaults.standard.removeObject(
-            forKey: "userEmail"
-        )
+        APIClient.borrarSesion()
 
         dismiss(animated: true)
     }

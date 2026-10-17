@@ -17,6 +17,42 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         // If using a storyboard, the `window` property will automatically be initialized and attached to the scene.
         // This delegate does not imply the connecting scene or session are new (see `application:configurationForConnectingSceneSession` instead).
         guard let _ = (scene as? UIWindowScene) else { return }
+
+        // Si la sesión ya no se puede renovar (refresh vencido o cuenta
+        // suspendida), APIClient avisa y aquí regresamos al login.
+        NotificationCenter.default.addObserver(
+            forName: .aguasSesionTerminada,
+            object: nil,
+            queue: .main
+        ) { [weak self] notification in
+            let mensaje = notification.userInfo?["mensaje"] as? String
+                ?? "Tu sesión terminó. Inicia sesión de nuevo."
+            MainActor.assumeIsolated {
+                self?.regresarAlLogin(mensaje: mensaje)
+            }
+        }
+    }
+
+    // La app es: Navigation (Bienvenida → Login) y, encima, el Tab Bar
+    // presentado a pantalla completa. Quitar lo presentado deja el Login.
+    private func regresarAlLogin(mensaje: String) {
+        guard let raiz = window?.rootViewController else { return }
+
+        let mostrarAviso = {
+            let alerta = UIAlertController(
+                title: "Sesión terminada",
+                message: mensaje,
+                preferredStyle: .alert
+            )
+            alerta.addAction(UIAlertAction(title: "OK", style: .default))
+            raiz.present(alerta, animated: true)
+        }
+
+        if raiz.presentedViewController != nil {
+            raiz.dismiss(animated: true, completion: mostrarAviso)
+        } else {
+            mostrarAviso()
+        }
     }
 
     func sceneDidDisconnect(_ scene: UIScene) {
