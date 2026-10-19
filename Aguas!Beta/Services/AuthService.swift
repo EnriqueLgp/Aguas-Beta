@@ -17,12 +17,18 @@ nonisolated struct LoginResponse: Codable, Sendable {
     let refreshToken: String
     let nombre: String
     let correo: String
+    let rol: String
+}
+
+nonisolated struct RefreshResponse: Codable, Sendable {
+    let accessToken: String
 }
 
 enum AuthServiceError: LocalizedError {
     case invalidURL
     case invalidResponse
     case noData
+    case missingRefreshToken
     case serverError(String)
 
     var errorDescription: String? {
@@ -35,6 +41,9 @@ enum AuthServiceError: LocalizedError {
 
         case .noData:
             return "El servidor no devolvió información."
+
+        case .missingRefreshToken:
+            return "No hay una sesión activa."
 
         case .serverError(let message):
             return message
@@ -224,6 +233,101 @@ final class AuthService {
                 )
 
                 completion(.success(result))
+
+            } catch {
+
+                completion(.failure(error))
+            }
+
+        }.resume()
+    }
+
+    // MARK: - Refresh
+
+    func refreshAccessToken(
+        completion: @escaping (Result<String, Error>) -> Void
+    ) {
+
+        guard let refreshToken = UserDefaults.standard.string(
+            forKey: "refreshToken"
+        ) else {
+            completion(.failure(AuthServiceError.missingRefreshToken))
+            return
+        }
+
+        guard let url = URL(string: "\(baseURL)/auth/refresh") else {
+            completion(.failure(AuthServiceError.invalidURL))
+            return
+        }
+
+        var request = URLRequest(url: url)
+
+        request.httpMethod = "POST"
+
+        request.setValue(
+            "application/json",
+            forHTTPHeaderField: "Content-Type"
+        )
+
+        let body: [String: Any] = [
+            "refreshToken": refreshToken
+        ]
+
+        do {
+            request.httpBody = try JSONSerialization.data(
+                withJSONObject: body
+            )
+        } catch {
+            completion(.failure(error))
+            return
+        }
+
+        URLSession.shared.dataTask(with: request) {
+            data,
+            response,
+            error in
+
+            if let error = error {
+                completion(.failure(error))
+                return
+            }
+
+            guard let httpResponse = response as? HTTPURLResponse else {
+                completion(.failure(AuthServiceError.invalidResponse))
+                return
+            }
+
+            guard let data = data else {
+                completion(.failure(AuthServiceError.noData))
+                return
+            }
+
+            guard (200...299).contains(httpResponse.statusCode) else {
+
+                let message = self.extractErrorMessage(from: data)
+
+                completion(
+                    .failure(
+                        AuthServiceError.serverError(message)
+                    )
+                )
+
+                return
+            }
+
+            do {
+
+                let result = try JSONDecoder().decode(
+                    RefreshResponse.self,
+                    from: data
+                )
+
+                UserDefaults.standard.set(
+                    result.accessToken,
+                    forKey: "accessToken"
+                )
+
+                completion(.success(result.accessToken))
 
             } catch {
 

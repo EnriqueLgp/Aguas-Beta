@@ -84,6 +84,10 @@ class PerfilViewController: UIViewController {
         UserDefaults.standard.removeObject(
             forKey: "userEmail"
         )
+        
+        UserDefaults.standard.removeObject(
+            forKey: "userRole"
+        )
 
         dismiss(animated: true)
     }

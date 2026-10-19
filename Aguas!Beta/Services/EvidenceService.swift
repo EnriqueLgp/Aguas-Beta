@@ -27,13 +27,6 @@ final class EvidenceService {
         completion: @escaping (Result<EvidenceResponse, Error>) -> Void
     ) {
 
-        guard let accessToken = UserDefaults.standard.string(
-            forKey: "accessToken"
-        ) else {
-            completion(.failure(EvidenceServiceError.missingAccessToken))
-            return
-        }
-
         guard let url = URL(
             string: "\(baseURL)/evidencia/reporte/\(reportID)"
         ) else {
@@ -44,64 +37,53 @@ final class EvidenceService {
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
 
-        request.setValue(
-            "Bearer \(accessToken)",
-            forHTTPHeaderField: "Authorization"
-        )
+        AuthenticatedRequest.shared.perform(
+            request: request
+        ) { result in
 
-        URLSession.shared.dataTask(with: request) {
-            data,
-            response,
-            error in
+            switch result {
 
-            if let error = error {
-                completion(.failure(error))
-                return
-            }
+            case .success(let response):
 
-            guard let httpResponse =
-                    response as? HTTPURLResponse else {
-                completion(.failure(EvidenceServiceError.invalidResponse))
-                return
-            }
+                let data = response.0
+                let httpResponse = response.1
 
-            guard let data = data else {
-                completion(.failure(EvidenceServiceError.noData))
-                return
-            }
-
-            guard (200...299).contains(httpResponse.statusCode) else {
-                completion(
-                    .failure(
-                        EvidenceServiceError.serverError(
-                            httpResponse.statusCode
-                        )
-                    )
-                )
-                return
-            }
-
-            do {
-
-                let evidences = try JSONDecoder().decode(
-                    [EvidenceResponse].self,
-                    from: data
-                )
-
-                guard let evidence = evidences.first else {
+                guard (200...299).contains(httpResponse.statusCode) else {
                     completion(
-                        .failure(EvidenceServiceError.noEvidence)
+                        .failure(
+                            EvidenceServiceError.serverError(
+                                httpResponse.statusCode
+                            )
+                        )
                     )
                     return
                 }
 
-                completion(.success(evidence))
+                do {
 
-            } catch {
+                    let evidences = try JSONDecoder().decode(
+                        [EvidenceResponse].self,
+                        from: data
+                    )
+
+                    guard let evidence = evidences.first else {
+                        completion(
+                            .failure(EvidenceServiceError.noEvidence)
+                        )
+                        return
+                    }
+
+                    completion(.success(evidence))
+
+                } catch {
+                    completion(.failure(error))
+                }
+
+            case .failure(let error):
+
                 completion(.failure(error))
             }
-
-        }.resume()
+        }
     }
 }
 

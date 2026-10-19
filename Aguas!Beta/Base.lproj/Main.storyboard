@@ -742,6 +742,7 @@
                     </view>
                     <tabBarItem key="tabBarItem" title="Inicio" image="house.fill" catalog="system" id="A0D-Ys-grm"/>
                     <connections>
+                        <outlet property="notificationsButton" destination="XFK-9v-brI" id="QH6-2e-oBv"/>
                         <outlet property="welcomeLabel" destination="bYX-51-Uf9" id="v5N-Vg-dv9"/>
                         <segue destination="gqW-cv-KJ1" kind="presentation" identifier="goToNotifications" modalPresentationStyle="fullScreen" id="O86-L6-5Kw"/>
                     </connections>
