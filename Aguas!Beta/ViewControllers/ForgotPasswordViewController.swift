@@ -55,13 +55,51 @@ class ForgotPasswordViewController: UIViewController {
             return
         }
 
-        // Cuando conectemos el backend, aquí se verificará que exista una cuenta con este correo
-        // Solo si el backend confirma que el correo existe,se deberá ejecutar este segue
+        view.endEditing(true)
+        sender.isEnabled = false
 
-        performSegue(
-            withIdentifier: "goToVerifyCode",
-            sender: self
-        )
+        PasswordService.shared.forgotPassword(
+            correo: email
+        ) { [weak self] result in
+
+            DispatchQueue.main.async {
+
+                sender.isEnabled = true
+
+                guard let self = self,
+                      self.viewIfLoaded?.window != nil,
+                      self.navigationController?.topViewController === self else {
+                    return
+                }
+
+                switch result {
+
+                case .success:
+
+                    self.performSegue(
+                        withIdentifier: "goToVerifyCode",
+                        sender: email
+                    )
+
+                case .failure(let error):
+
+                    self.showAlert(
+                        title: "No se pudo solicitar el código",
+                        message: error.localizedDescription
+                    )
+                }
+            }
+        }
+    }
+
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+
+        if segue.identifier == "goToVerifyCode",
+           let destination = segue.destination as? VerifyCodeViewController,
+           let email = sender as? String {
+
+            destination.correo = email
+        }
     }
 
     private func isValidEmail(_ email: String) -> Bool {

@@ -17,10 +17,30 @@ class RegisterViewController: UIViewController {
     @IBOutlet weak var passwordTextField: UITextField!
     @IBOutlet weak var confirmPasswordTextField: UITextField!
 
+
+    @IBOutlet weak var privacyTextView: UITextView!
+
     @IBOutlet weak var privacyButton: UIButton!
 
     override func viewDidLoad() {
         super.viewDidLoad()
+
+        privacyTextView.text = PrivacyContent.text
+        privacyTextView.isEditable = false
+        privacyTextView.isSelectable = true
+        privacyTextView.isScrollEnabled = true
+        privacyTextView.font = UIFont.systemFont(ofSize: 14)
+        privacyTextView.textColor = .label
+        privacyTextView.backgroundColor = .secondarySystemBackground
+        privacyTextView.layer.cornerRadius = 8
+        privacyTextView.layer.borderWidth = 1
+        privacyTextView.layer.borderColor = UIColor.separator.cgColor
+        privacyTextView.textContainerInset = UIEdgeInsets(
+            top: 12,
+            left: 12,
+            bottom: 12,
+            right: 12
+        )
 
         // Estado inicial del checkbox de privacidad
         privacyButton.isSelected = false
