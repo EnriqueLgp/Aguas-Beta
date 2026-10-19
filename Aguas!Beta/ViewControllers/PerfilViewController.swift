@@ -30,13 +30,28 @@ class PerfilViewController: UIViewController {
     }
 
     @IBAction func changePasswordTapped(_ sender: UIButton) {
-        // Se conectará cuando esté disponible el endpoint
-        // para cambiar la contraseña de un usuario autenticado.
+
+        performSegue(
+            withIdentifier: "goToChangePassword",
+            sender: self
+        )
+    }
+
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+
+        if segue.identifier == "goToChangePassword",
+           let destination = segue.destination as? NewPasswordViewController {
+
+            destination.isChangingPassword = true
+        }
     }
 
     @IBAction func privacyTapped(_ sender: UIButton) {
-        // Aquí se conectará posteriormente la pantalla
-        // correspondiente al aviso de privacidad.
+
+        performSegue(
+            withIdentifier: "goToPrivacy",
+            sender: self
+        )
     }
 
     @IBAction func logoutTapped(_ sender: UIButton) {
