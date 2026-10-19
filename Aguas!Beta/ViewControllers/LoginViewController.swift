@@ -50,6 +50,13 @@ class LoginViewController: UIViewController {
             name: UIResponder.keyboardWillHideNotification,
             object: nil
         )
+
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(sessionExpired),
+            name: Notification.Name("SessionExpired"),
+            object: nil
+        )
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -92,6 +99,17 @@ class LoginViewController: UIViewController {
 
         scrollView.contentInset.bottom = 0
         scrollView.verticalScrollIndicatorInsets.bottom = 0
+    }
+
+    @objc private func sessionExpired() {
+
+        dismiss(animated: true) {
+
+            self.showAlert(
+                title: "Sesión expirada",
+                message: "Tu sesión terminó. Inicia sesión nuevamente."
+            )
+        }
     }
 
     @IBAction func loginButtonTapped(_ sender: UIButton) {
@@ -156,10 +174,15 @@ class LoginViewController: UIViewController {
                         response.nombre,
                         forKey: "userName"
                     )
-                    
+
                     UserDefaults.standard.set(
                         response.correo,
                         forKey: "userEmail"
+                    )
+
+                    UserDefaults.standard.set(
+                        response.rol,
+                        forKey: "userRole"
                     )
 
                     // El login fue correcto, Ahora sí entra al Tab Bar Controller
@@ -206,5 +229,9 @@ class LoginViewController: UIViewController {
         )
 
         present(alert, animated: true)
+    }
+
+    deinit {
+        NotificationCenter.default.removeObserver(self)
     }
 }

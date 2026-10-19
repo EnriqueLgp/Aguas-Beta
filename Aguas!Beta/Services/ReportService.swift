@@ -50,13 +50,6 @@ final class ReportService {
         completion: @escaping (Result<[ReportResponse], Error>) -> Void
     ) {
 
-        guard let accessToken = UserDefaults.standard.string(
-            forKey: "accessToken"
-        ) else {
-            completion(.failure(ReportServiceError.missingAccessToken))
-            return
-        }
-
         guard let url = URL(
             string: "\(baseURL)\(endpoint)"
         ) else {
@@ -68,70 +61,53 @@ final class ReportService {
 
         request.httpMethod = "GET"
 
-        request.setValue(
-            "Bearer \(accessToken)",
-            forHTTPHeaderField: "Authorization"
-        )
+        AuthenticatedRequest.shared.perform(
+            request: request
+        ) { result in
 
-        URLSession.shared.dataTask(with: request) {
-            data,
-            response,
-            error in
+            switch result {
 
-            if let error = error {
-                completion(.failure(error))
-                return
-            }
+            case .success(let response):
 
-            guard let httpResponse =
-                    response as? HTTPURLResponse else {
-                completion(.failure(ReportServiceError.invalidResponse))
-                return
-            }
+                let data = response.0
+                let httpResponse = response.1
 
-            guard let data = data else {
-                completion(.failure(ReportServiceError.noData))
-                return
-            }
-
-            guard (200...299).contains(httpResponse.statusCode) else {
-                completion(
-                    .failure(
-                        ReportServiceError.serverError(
-                            httpResponse.statusCode
+                guard (200...299).contains(httpResponse.statusCode) else {
+                    completion(
+                        .failure(
+                            ReportServiceError.serverError(
+                                httpResponse.statusCode
+                            )
                         )
                     )
-                )
-                return
-            }
 
-            do {
+                    return
+                }
 
-                let reports = try JSONDecoder().decode(
-                    [ReportResponse].self,
-                    from: data
-                )
+                do {
 
-                completion(.success(reports))
+                    let reports = try JSONDecoder().decode(
+                        [ReportResponse].self,
+                        from: data
+                    )
 
-            } catch {
+                    completion(.success(reports))
+
+                } catch {
+                    completion(.failure(error))
+                }
+
+            case .failure(let error):
+
                 completion(.failure(error))
             }
-
-        }.resume()
+        }
     }
 
     func createReport(
         draft: ReportDraft,
         completion: @escaping (Result<Void, Error>) -> Void
     ) {
-
-        guard let accessToken = UserDefaults.standard.string(
-            forKey: "accessToken"
-        ) else {
-            completion(.failure(ReportServiceError.missingAccessToken))
-            return
-        }
 
         guard let url = URL(
             string: "\(baseURL)/reportes"
@@ -146,11 +122,6 @@ final class ReportService {
         var request = URLRequest(url: url)
 
         request.httpMethod = "POST"
-
-        request.setValue(
-            "Bearer \(accessToken)",
-            forHTTPHeaderField: "Authorization"
-        )
 
         request.setValue(
             "multipart/form-data; boundary=\(boundary)",
@@ -248,38 +219,36 @@ final class ReportService {
 
         request.httpBody = body
 
-        URLSession.shared.dataTask(with: request) {
-            _,
-            response,
-            error in
+        AuthenticatedRequest.shared.perform(
+            request: request
+        ) { result in
 
-            if let error = error {
-                completion(.failure(error))
-                return
-            }
+            switch result {
 
-            guard let httpResponse =
-                    response as? HTTPURLResponse else {
-                completion(.failure(ReportServiceError.invalidResponse))
-                return
-            }
+            case .success(let response):
 
-            guard (200...299).contains(httpResponse.statusCode) else {
+                let httpResponse = response.1
 
-                completion(
-                    .failure(
-                        ReportServiceError.serverError(
-                            httpResponse.statusCode
+                guard (200...299).contains(httpResponse.statusCode) else {
+
+                    completion(
+                        .failure(
+                            ReportServiceError.serverError(
+                                httpResponse.statusCode
+                            )
                         )
                     )
-                )
 
-                return
+                    return
+                }
+
+                completion(.success(()))
+
+            case .failure(let error):
+
+                completion(.failure(error))
             }
-
-            completion(.success(()))
-
-        }.resume()
+        }
     }
 
     private func appendTextField(
