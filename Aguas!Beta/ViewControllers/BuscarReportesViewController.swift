@@ -61,9 +61,7 @@ class BuscarReportesViewController: UIViewController,
                     }
 
                     // Actualiza la lista mostrada con los reportes obtenidos del backend
-                    self.filteredReports = self.reports
-
-                    self.tableView.reloadData()
+                    self.filterReports(self.searchBar.text ?? "")
 
                 case .failure(let error):
 
@@ -129,6 +127,11 @@ class BuscarReportesViewController: UIViewController,
         textDidChange searchText: String
     ) {
 
+        filterReports(searchText)
+    }
+
+    private func filterReports(_ searchText: String) {
+
         let text = searchText.trimmingCharacters(
             in: .whitespacesAndNewlines
         )
@@ -140,12 +143,34 @@ class BuscarReportesViewController: UIViewController,
 
         } else {
 
-            // Permite buscar utilizando tanto el título generado como el enlace sospechoso del reporte
+            // Permite buscar utilizando el título, el enlace o el teléfono del reporte
             filteredReports = reports.filter { report in
 
                 report.title.localizedCaseInsensitiveContains(text) ||
-                report.url.localizedCaseInsensitiveContains(text)
+                report.url.localizedCaseInsensitiveContains(text) ||
+                report.phone.localizedCaseInsensitiveContains(text)
             }
+        }
+
+        if filteredReports.isEmpty {
+
+            let messageLabel = UILabel()
+
+            messageLabel.text = text.isEmpty
+                ? "No hay reportes verificados disponibles."
+                : "No se encontraron reportes."
+
+            messageLabel.textAlignment = .center
+            messageLabel.textColor = .secondaryLabel
+            messageLabel.font = .preferredFont(forTextStyle: .body)
+            messageLabel.adjustsFontForContentSizeCategory = true
+            messageLabel.numberOfLines = 0
+
+            tableView.backgroundView = messageLabel
+
+        } else {
+
+            tableView.backgroundView = nil
         }
 
         // Actualiza inmediatamente los resultados mostrados

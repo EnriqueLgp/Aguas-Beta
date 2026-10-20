@@ -6,7 +6,18 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXContainerItemProxy section */
+		FAE029073086FABC000C93DC /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = FAEDD54230599AC100BF1A36 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = FAEDD54930599AC100BF1A36;
+			remoteInfo = "Aguas!Beta";
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXFileReference section */
+		FAE029033086FABC000C93DC /* Aguas!BetaTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Aguas!BetaTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		FAEDD54A30599AC100BF1A36 /* Aguas!Beta.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Aguas!Beta.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -21,6 +32,11 @@
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
+		FAE029043086FABC000C93DC /* Aguas!BetaTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = "Aguas!BetaTests";
+			sourceTree = "<group>";
+		};
 		FAEDD54C30599AC100BF1A36 /* Aguas!Beta */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
@@ -32,6 +48,13 @@
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		FAE029003086FABC000C93DC /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		FAEDD54730599AC100BF1A36 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -46,6 +69,7 @@
 			isa = PBXGroup;
 			children = (
 				FAEDD54C30599AC100BF1A36 /* Aguas!Beta */,
+				FAE029043086FABC000C93DC /* Aguas!BetaTests */,
 				FAEDD54B30599AC100BF1A36 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -54,6 +78,7 @@
 			isa = PBXGroup;
 			children = (
 				FAEDD54A30599AC100BF1A36 /* Aguas!Beta.app */,
+				FAE029033086FABC000C93DC /* Aguas!BetaTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -61,6 +86,29 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		FAE029023086FABC000C93DC /* Aguas!BetaTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = FAE029093086FABC000C93DC /* Build configuration list for PBXNativeTarget "Aguas!BetaTests" */;
+			buildPhases = (
+				FAE028FF3086FABC000C93DC /* Sources */,
+				FAE029003086FABC000C93DC /* Frameworks */,
+				FAE029013086FABC000C93DC /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				FAE029083086FABC000C93DC /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				FAE029043086FABC000C93DC /* Aguas!BetaTests */,
+			);
+			name = "Aguas!BetaTests";
+			packageProductDependencies = (
+			);
+			productName = "Aguas!BetaTests";
+			productReference = FAE029033086FABC000C93DC /* Aguas!BetaTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 		FAEDD54930599AC100BF1A36 /* Aguas!Beta */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = FAEDD55D30599AC200BF1A36 /* Build configuration list for PBXNativeTarget "Aguas!Beta" */;
@@ -93,6 +141,10 @@
 				LastSwiftUpdateCheck = 2650;
 				LastUpgradeCheck = 2650;
 				TargetAttributes = {
+					FAE029023086FABC000C93DC = {
+						CreatedOnToolsVersion = 26.5;
+						TestTargetID = FAEDD54930599AC100BF1A36;
+					};
 					FAEDD54930599AC100BF1A36 = {
 						CreatedOnToolsVersion = 26.5;
 					};
@@ -113,11 +165,19 @@
 			projectRoot = "";
 			targets = (
 				FAEDD54930599AC100BF1A36 /* Aguas!Beta */,
+				FAE029023086FABC000C93DC /* Aguas!BetaTests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		FAE029013086FABC000C93DC /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		FAEDD54830599AC100BF1A36 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -128,6 +188,13 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		FAE028FF3086FABC000C93DC /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		FAEDD54630599AC100BF1A36 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -137,7 +204,57 @@
 		};
 /* End PBXSourcesBuildPhase section */
 
+/* Begin PBXTargetDependency section */
+		FAE029083086FABC000C93DC /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = FAEDD54930599AC100BF1A36 /* Aguas!Beta */;
+			targetProxy = FAE029073086FABC000C93DC /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
 /* Begin XCBuildConfiguration section */
+		FAE0290A3086FABC000C93DC /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 72Q84KKLBD;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.enriquelgp.Aguas-BetaTests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Aguas!Beta.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Aguas!Beta";
+			};
+			name = Debug;
+		};
+		FAE0290B3086FABC000C93DC /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 72Q84KKLBD;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.enriquelgp.Aguas-BetaTests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Aguas!Beta.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Aguas!Beta";
+			};
+			name = Release;
+		};
 		FAEDD55E30599AC200BF1A36 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -145,8 +262,10 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 72Q84KKLBD;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "Aguas!Beta/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "Aguas!";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UIMainStoryboardFile = Main;
@@ -157,7 +276,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "tec.Aguas-Beta";
+				PRODUCT_BUNDLE_IDENTIFIER = com.enriquelgp.aguasbeta;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
@@ -176,8 +295,10 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 72Q84KKLBD;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "Aguas!Beta/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "Aguas!";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UIMainStoryboardFile = Main;
@@ -188,7 +309,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "tec.Aguas-Beta";
+				PRODUCT_BUNDLE_IDENTIFIER = com.enriquelgp.aguasbeta;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
@@ -322,6 +443,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		FAE029093086FABC000C93DC /* Build configuration list for PBXNativeTarget "Aguas!BetaTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				FAE0290A3086FABC000C93DC /* Debug */,
+				FAE0290B3086FABC000C93DC /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		FAEDD54530599AC100BF1A36 /* Build configuration list for PBXProject "Aguas!Beta" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (

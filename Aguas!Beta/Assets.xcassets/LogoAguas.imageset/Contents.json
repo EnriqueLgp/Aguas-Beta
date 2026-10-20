@@ -1,11 +1,11 @@
 {
   "images" : [
     {
-      "filename" : "LogoAguas.png",
       "idiom" : "universal",
       "scale" : "1x"
     },
     {
+      "filename" : "aguas-logo-exclamacion.png",
       "idiom" : "universal",
       "scale" : "2x"
     },
